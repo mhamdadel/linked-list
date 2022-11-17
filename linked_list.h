@@ -23,14 +23,15 @@ void Add(LinkedList * ls, int data)
     {
         newNode->index = 0;
         ls->head = ls->tail = newNode;
-        ls->head->index = ls->tail->index = 0;
+        newNode->index = ls->head->index = ls->tail->index = 0;
     }
     else
     {
         ls->tail->next = newNode;
         newNode->prev = ls->tail;
         ls->tail = newNode;
-        newNode->index = ls->tail->index + 1;
+        ls->tail->index = NULL;
+        newNode->index = (int)newNode->prev->index + 1;
     }
 }
 
@@ -67,6 +68,20 @@ void DeleteNode(LinkedList * ls, int data)
     }
     else
     {
+        int isAfterEdit = 0;
+        Node *current = node;
+        while (current != NULL)
+        {
+            if(isAfterEdit == 1)
+            {
+                current->index--;
+            }
+            if(node->data == current->data)
+            {
+                isAfterEdit = 1;
+            }
+            current = current->next;
+        }
         if(node == ls->head)
         {
             if(node == ls->tail)
@@ -99,67 +114,27 @@ void InsertAfter(LinkedList * ls, int data, int AfterData)
     Node *node = GetNodeByData(ls, AfterData);
     Node *newNode = malloc(sizeof(Node));
     newNode->data = data;
-    newNode->prev = newNode->next = NULL;
+    newNode->prev = newNode->next = newNode->index = NULL;
     if(node == NULL)
     {
         return;
     }
     else
     {
-        if(node == ls->head)
-        {
-            if(node == ls->tail)
-            {
-                Add(ls, data);
-                node->next->index = node->index + 1;
-            }
-            else
-            {
-                Node *prev = node->prev;
-                Node *next = node->next;
-
-                node->next = newNode;
-                node->next->index = node->index + 1;
-
-                newNode->prev = node;
-                newNode->next = next;
-
-                next->prev = newNode;
-
-                newNode->index = node->index+1;
-
-                int isAfterEdit = 0;
-                Node *current = newNode;
-                while (current != NULL)
-                {
-                    if(isAfterEdit == 1)
-                    {
-                        current->index++;
-                    }
-                    if(newNode->data == current->data)
-                    {
-                        isAfterEdit = 1;
-                    }
-                    current = current->next;
-                }
-            }
-        }
-        else if(node == ls->tail)
+        if(node == ls->tail)
         {
             Add(ls, data);
-            node->next->index = node->index + 1;
+            newNode->index = node->index + 1;
         }
         else
         {
-            Node *prev = node->prev;
-            Node *next = node->next;
-
-            node->next = newNode;
             newNode->prev = node;
-            newNode->next = next;
-            next->prev = newNode;
+            newNode->next = node->next;
 
-            node->next->index = node->index + 1;
+            node->next->prev = newNode;
+            node->next = newNode;
+
+            newNode->index = node->index + 1;
 
             int isAfterEdit = 0;
             Node *current = newNode;
@@ -175,6 +150,7 @@ void InsertAfter(LinkedList * ls, int data, int AfterData)
                 }
                 current = current->next;
             }
+
         }
     }
 }
@@ -193,30 +169,16 @@ int GetCount(LinkedList * ls)
 int *GetDataByIndex(LinkedList * ls, int index)
 {
     Node *current = ls->head;
-    /*
-    while (current != NULL)
-    {
-        if(index == current->index)
-        {
-            return current->data;
-        }
-        current = current->next;
-    }
-    */
     if(index + 1 < GetCount(ls))
     {
-        for(int i =0; i<GetCount(ls); i++)
+        while (current != NULL)
         {
-            if(index == i)
+            if(index == current->index)
             {
                 return current->data;
             }
             current = current->next;
         }
-    }
-    else
-    {
-        return -1;
     }
 }
 
